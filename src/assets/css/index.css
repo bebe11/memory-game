@@ -1,0 +1,24 @@
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+  background: #283D5A;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+  'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+  sans-serif;
+}
+
+#root {
+  height: 100vh;
+  display: flex;
+}
+
+.memory-game {
+  width: 40rem;
+  height: 40rem;
+  margin: auto;
+  display: flex;
+  flex-wrap: wrap;
+  gap: .625rem;
+  align-content: center;
+}
