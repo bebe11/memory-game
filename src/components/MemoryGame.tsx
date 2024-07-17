@@ -1,29 +1,57 @@
 import {useState} from "react";
 import {ICard} from "../interfaces/ICard";
 import Card from "./Card";
+import styled from "styled-components";
+import {ControlPanel} from "./ControlPanel";
+import useCookie from "../hooks/useCookie";
 
-const cards = [
-    { value: 1},
-    { value: 2},
-    { value: 3},
-    { value: 4},
-    { value: 5},
-    { value: 6},
-    { value: 7},
-    { value: 8},
-];
+const MemoryGameContainer = styled.div`
+    margin: auto;
+    display: flex;
+    flex-direction: column;
+    align-content: center;
 
-export const cardsData = [...cards, ...cards]
+    .game-table {
+        width: 40rem;
+        height: 40rem;
+        gap: .625rem;
+        display: grid;
+    }
+`;
+
+const createArray = (size: number) => Array.from({length: size}, (_, i) => i + 1)
+
+const cardsData = (size: number) => [...createArray(size), ...createArray(size)]
     .sort(() => Math.random() - 0.5)
-    .map(card => ({ ...card, id: Math.random(), flipped: false, hidden: false }));
+    .map(card => ({value: card, id: Math.random(), flipped: false, done: false}));
 
 export const MemoryGame = () => {
-    let [cards, setCards] = useState<ICard[]>(cardsData);
-    let [isLoading, setIsLoading] = useState(false);
-    let [firstChoice, setFirstChoice] = useState(null);
+    const {
+        setCookieCards,
+        getCookieCards,
+        resetCookieCards,
+        getCookieMoves,
+        setCookieMoves,
+        resetCookieMoves
+    } = useCookie();
+    const DEFAULT_SIZE = 8;
+    const [size, setSize] = useState(DEFAULT_SIZE);
+    const [cards, setCards] = useState<ICard[]>(getCookieCards() ?? cardsData(DEFAULT_SIZE));
+    const [isLoading, setIsLoading] = useState(false);
+    const [firstChoice, setFirstChoice] = useState(null);
+    const [moves, setMoves] = useState(getCookieMoves() ?? 0);
+
+    const onChangeFlipped = (clickedCard: ICard) => {
+        clickedCard.flipped = !clickedCard.flipped;
+        onChangeCard(clickedCard);
+    }
+
+    const onChangeDone = (clickedCard: ICard) => {
+        clickedCard.done = true;
+        onChangeCard(clickedCard);
+    }
 
     const onChangeCard = (clickedCard: ICard) => {
-        clickedCard.flipped = !clickedCard.flipped;
         let newState = [...cards];
         let index = cards.findIndex((card) => card.id === clickedCard.id);
         newState.splice(index, 1, clickedCard);
@@ -36,39 +64,57 @@ export const MemoryGame = () => {
         }
         if (!firstChoice) {
             setFirstChoice(card);
-            onChangeCard(card);
+            onChangeFlipped(card);
         } else {
-            onChangeCard(card);
+            onChangeFlipped(card);
             checker(card);
-
         }
     };
 
     const checker = (clickedCard: ICard) => {
-        if (firstChoice.value === clickedCard.value) {
-            console.log('találat');
-        } else {
-            setIsLoading(true);
-            setTimeout(()=> {
-                onChangeCard(firstChoice);
-                onChangeCard(clickedCard);
-                setIsLoading(false);
-            }, 1500)
+        setIsLoading(true);
+        setTimeout(() => {
+            if (firstChoice.value === clickedCard.value) {
+                onChangeDone(firstChoice);
+                onChangeDone(clickedCard);
+            } else {
+                onChangeFlipped(firstChoice);
+                onChangeFlipped(clickedCard);
+            }
+            setIsLoading(false);
+            setFirstChoice(null);
+            setCookieCards(cards);
+            let tempMoves = moves + 1;
+            setMoves(tempMoves);
+            setCookieMoves(tempMoves);
+        }, 1000)
+    }
+
+    const newGame = (e) => {
+        if (isLoading) {
+            return;
         }
-        setFirstChoice(null);
+        resetCookieCards();
+        resetCookieMoves();
+        setCards(cardsData(DEFAULT_SIZE));
+        setMoves(0);
     }
 
     return (
-        <div className="memory-game">
-            {cards?.map((card) => {
-                return (
-                    <Card
-                        key={card.id}
-                        card={card}
-                        onClick={(e) => handleClick(e, card)}
-                    />
-                );
-            })}
-        </div>
+        <MemoryGameContainer>
+            <ControlPanel onClick={(e) => newGame(e)} move={moves}></ControlPanel>
+            <div className="game-table"
+                 style={{gridTemplateColumns: `repeat(${Math.round(Math.sqrt(size * 2))}, 1fr)`}}>
+                {cards?.map((card) => {
+                    return (
+                        <Card
+                            key={card.id}
+                            card={card}
+                            onClick={(e) => handleClick(e, card)}
+                        />
+                    );
+                })}
+            </div>
+        </MemoryGameContainer>
     )
 }
