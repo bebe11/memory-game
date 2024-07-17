@@ -41,6 +41,8 @@ const cardsData = (size: number) => [...createArray(size), ...createArray(size)]
     .sort(() => Math.random() - 0.5)
     .map(card => ({value: card, id: Math.random(), flipped: false, done: false}));
 
+const calculateGridTemplateCol = (size: number) => `repeat(${Math.round(Math.sqrt(size * 2))}, minmax(100px, 1fr))`
+
 export const MemoryGame = () => {
     const {
         setCookieCards,
@@ -134,7 +136,7 @@ export const MemoryGame = () => {
             <ControlPanel onClick={(e) => newGame(e)} size={tempSize} move={moves}
                           onInputChange={(e) => setTempSize(e)}></ControlPanel>
             <div className="game-table"
-                 style={{gridTemplateColumns: `repeat(${Math.round(Math.sqrt(size * 2))}, minmax(100px, 1fr))`}}>
+                 style={{gridTemplateColumns: calculateGridTemplateCol(size)}}>
                 {cards?.map((card) => {
                     return (
                         <Card
