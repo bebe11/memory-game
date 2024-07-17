@@ -1,12 +1,11 @@
 import styled from "styled-components";
 import cardBack from "../assets/images/logo.svg";
+import {useRef} from "react";
 
 const CARD_BACKGROUND = '#4AB4DE';
 
 const CardContainer = styled.div`
     background: ${CARD_BACKGROUND};
-    width: 100%;
-    height: 100%;
     position: relative;
     cursor: pointer;
     border-radius: .4rem;
@@ -43,16 +42,20 @@ const CardContainer = styled.div`
         transform: rotateY(180deg);
         text-align: center;
         vertical-align: middle;
-        font-size: 5rem;
+        min-height: 20px;
         color: #EEDBCC;
     }
 `;
 
 export const Card = ({card, onClick}) => {
+    const containerRef = useRef<HTMLDivElement>();
+    const calculateFontSize = containerRef.current?.offsetHeight - 40;
+
     return (
         <CardContainer className={card.done ? 'done' : card.flipped ? 'flip' : ''}
                        onClick={() => !card.flipped && onClick()}>
-            <div className="front">{card.value}</div>
+            <div ref={containerRef} className="front"
+                 style={{fontSize: `${calculateFontSize}px`, lineHeight: `${calculateFontSize}px`}}>{card.value}</div>
             <img className="back" src={cardBack} alt="Card back side"/>
         </CardContainer>
     )

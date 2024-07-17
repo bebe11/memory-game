@@ -14,16 +14,13 @@ const useCookie = () => {
         CookieType.TABLE_SIZE,
     ]);
 
-    const getCookieCards = () => cookies.CARDS;
+    const getCookieCards = (): ICard[] => cookies.CARDS;
 
     const setCookieCards = (cards: ICard[]) => setCookie(CookieType.CARDS, cards);
 
     const resetCookieCards = () => removeCookie(CookieType.CARDS);
 
-    const getCookieMoves = (): number => {
-        console.log(cookies.MOVES)
-        return cookies.MOVES;
-    }
+    const getCookieMoves = (): number => cookies.MOVES;
 
     const setCookieMoves = (value: number) => setCookie(CookieType.MOVES, value);
 

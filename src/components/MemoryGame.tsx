@@ -1,4 +1,4 @@
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import {ICard} from "../interfaces/ICard";
 import Card from "./Card";
 import styled from "styled-components";
@@ -10,12 +10,28 @@ const MemoryGameContainer = styled.div`
     display: flex;
     flex-direction: column;
     align-content: center;
+    position: relative;
+    gap: 2rem;
 
     .game-table {
         width: 40rem;
         height: 40rem;
         gap: .625rem;
         display: grid;
+    }
+
+    p {
+        color: #EEDBCC;
+        font-size: 1.5rem;
+        text-align: center;
+    }
+
+    .show {
+        visibility: visible;
+    }
+
+    .hidden {
+        visibility: hidden;
     }
 `;
 
@@ -31,15 +47,22 @@ export const MemoryGame = () => {
         getCookieCards,
         resetCookieCards,
         getCookieMoves,
+        getCookieTableSize,
         setCookieMoves,
-        resetCookieMoves
+        resetCookieMoves,
+        setCookieTableSize
     } = useCookie();
     const DEFAULT_SIZE = 8;
-    const [size, setSize] = useState(DEFAULT_SIZE);
-    const [cards, setCards] = useState<ICard[]>(getCookieCards() ?? cardsData(DEFAULT_SIZE));
+    const [size, setSize] = useState(getCookieTableSize() ?? DEFAULT_SIZE);
+    const [tempSize, setTempSize] = useState(size);
+    const [cards, setCards] = useState<ICard[]>(getCookieCards() ?? cardsData(size));
     const [isLoading, setIsLoading] = useState(false);
     const [firstChoice, setFirstChoice] = useState(null);
     const [moves, setMoves] = useState(getCookieMoves() ?? 0);
+
+    useEffect(() => {
+        setCookieTableSize(tempSize);
+    }, [size]);
 
     const onChangeFlipped = (clickedCard: ICard) => {
         clickedCard.flipped = !clickedCard.flipped;
@@ -96,15 +119,17 @@ export const MemoryGame = () => {
         }
         resetCookieCards();
         resetCookieMoves();
-        setCards(cardsData(DEFAULT_SIZE));
+        setCards(cardsData(tempSize));
         setMoves(0);
+        setSize(tempSize);
     }
 
     return (
         <MemoryGameContainer>
-            <ControlPanel onClick={(e) => newGame(e)} move={moves}></ControlPanel>
+            <ControlPanel onClick={(e) => newGame(e)} size={tempSize} move={moves}
+                          onInputChange={(e) => setTempSize(e)}></ControlPanel>
             <div className="game-table"
-                 style={{gridTemplateColumns: `repeat(${Math.round(Math.sqrt(size * 2))}, 1fr)`}}>
+                 style={{gridTemplateColumns: `repeat(${Math.round(Math.sqrt(size * 2))}, minmax(100px, 1fr))`}}>
                 {cards?.map((card) => {
                     return (
                         <Card
@@ -115,6 +140,9 @@ export const MemoryGame = () => {
                     );
                 })}
             </div>
+            <p className={`${cards.filter(value => !value.done).length === 0 ? 'show' : 'hidden'}`}>Congratulations! You
+                completed the task
+                in {moves} steps.</p>
         </MemoryGameContainer>
     )
 }
