@@ -62,7 +62,8 @@ export const ControlPanel = ({move, size, onClick, onInputChange}) => {
         <ControlPanelContainer>
             <div className="moves">Moves: {move}</div>
             <div className={"input-container"}>
-                <input type="number" value={size} onChange={updateInputValue}/> = {size * 2}
+                <input type="number" value={size} onChange={updateInputValue} minLength={2}
+                       maxLength={20}/> = {size * 2}
             </div>
             <button onClick={onClick}>New game</button>
         </ControlPanelContainer>

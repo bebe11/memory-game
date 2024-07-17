@@ -117,6 +117,11 @@ export const MemoryGame = () => {
         if (isLoading) {
             return;
         }
+
+        if (tempSize < 2 || tempSize > 20) {
+            alert('Please enter number between 2 and 20');
+            return;
+        }
         resetCookieCards();
         resetCookieMoves();
         setCards(cardsData(tempSize));
@@ -140,7 +145,8 @@ export const MemoryGame = () => {
                     );
                 })}
             </div>
-            <p className={`${cards.filter(value => !value.done).length === 0 ? 'show' : 'hidden'}`}>Congratulations! You
+            <p className={`${cards.filter(value => !value.done).length === 0 && size !== 0 ? 'show' : 'hidden'}`}>Congratulations!
+                You
                 completed the task
                 in {moves} steps.</p>
         </MemoryGameContainer>
